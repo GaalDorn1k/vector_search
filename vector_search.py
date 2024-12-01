@@ -39,7 +39,7 @@ class HybridOpenSearch(OpenSearchVectorSearch):
                             'combination': {
                                 'technique': 'arithmetic_mean',
                                 'parameters': {
-                                    'weights': [0.0, 0.1]
+                                    'weights': [0.8, 0.2]
                                 }
                             }
                         }
@@ -56,24 +56,6 @@ class HybridOpenSearch(OpenSearchVectorSearch):
         bulk_size: int = 500,
         **kwargs: Any,
     ) -> List[str]:
-        """Run more texts through the embeddings and add to the vectorstore.
-
-        Args:
-            texts: Iterable of strings to add to the vectorstore.
-            metadatas: Optional list of metadatas associated with the texts.
-            ids: Optional list of ids to associate with the texts.
-            bulk_size: Bulk API request count; Default: 500
-
-        Returns:
-            List of ids from adding the texts into the vectorstore.
-
-        Optional Args:
-            vector_field: Document field embeddings are stored in. Defaults to
-            "vector_field".
-
-            text_field: Document field the text of the document is stored in. Defaults
-            to "text".
-        """
         lower_texts = []
 
         for text in texts:
@@ -104,8 +86,8 @@ class HybridOpenSearch(OpenSearchVectorSearch):
                     'queries': [
                         {
                             'multi_match': {
-                                "query": query,
-                                "fields": 'metadata.lemmatized'
+                                'query': query,
+                                'fields': 'metadata.description'
                             }
                         },
                         {
@@ -126,6 +108,7 @@ class HybridOpenSearch(OpenSearchVectorSearch):
                 }
             }
         }
+
         response = requests.get(
             f'{self.opensearch_url}{self.index}/_search?search_pipeline={self.search_pipeline_name}',
             json=request)
