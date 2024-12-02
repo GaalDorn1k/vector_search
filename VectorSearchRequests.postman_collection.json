@@ -1,0 +1,120 @@
+{
+	"info": {
+		"_postman_id": "e7de17bd-dc7d-48b0-897f-4be284cc16a3",
+		"name": "VectorSearchRequests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28435454"
+	},
+	"item": [
+		{
+			"name": "search",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{service_url}}/api/search?query=Античный белый",
+					"host": [
+						"{{service_url}}"
+					],
+					"path": [
+						"api",
+						"search"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "Античный белый"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search_with_filter",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "filter",
+							"value": "{\"option_area\": 4066.8}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{service_url}}/api/search_with_filter?query=Античный белый",
+					"host": [
+						"{{service_url}}"
+					],
+					"path": [
+						"api",
+						"search_with_filter"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "Античный белый"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add_item",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "item",
+							"value": "{\"option_all_text\": \"Мама мыла раму\", \"option_area\": 256, \"option_id\": 9999}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{service_url}}/api/add_item",
+					"host": [
+						"{{service_url}}"
+					],
+					"path": [
+						"api",
+						"add_item"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{service_url}}/api/delete_item?id=9999",
+					"host": [
+						"{{service_url}}"
+					],
+					"path": [
+						"api",
+						"delete_item"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "9999"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

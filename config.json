@@ -1,13 +1,12 @@
 {
     "embeddings":{
         "hf_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-        "avg_characters_per_token": 3,
         "args": {}
     },
     "vector_store": {
-        "index_name": "",
+        "index_name": "vector-index",
         "args": {
-            "opensearch_url": "",
+            "opensearch_url": "http://localhost:9200",
             "http_auth": [],
             "use_ssl": false,
             "verify_certs": false,
@@ -16,5 +15,10 @@
             "bulk_size": 70000,
             "timeout": 300
         }
+    },
+    "search": {
+        "k": 10,
+        "space_type": "cosinesimil",
+        "weights": [0.8, 0.2]
     }
 }

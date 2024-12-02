@@ -11,14 +11,16 @@ class HybridOpenSearch(OpenSearchVectorSearch):
                  opensearch_url: str,
                  index_name: str,
                  embedding_function: Embeddings,
+                 search: dict,
                  **kwargs: Any):
         super().__init__(opensearch_url=opensearch_url,
                          index_name=index_name,
                          embedding_function=embedding_function,
                          **kwargs)
-        self.search_pipeline_name = 'test-pipeline'
+        self.search_config = search
+        self.search_pipeline_name = 'hybrid_pipeline_0'
         self.opensearch_url = opensearch_url if opensearch_url.endswith('/') else opensearch_url + '/'
-        self.index = None
+        self.index = index_name
         response = requests.get(f'{self.opensearch_url}_ingest/pipeline/')
         pipelines = response.json()
 
@@ -39,7 +41,7 @@ class HybridOpenSearch(OpenSearchVectorSearch):
                             'combination': {
                                 'technique': 'arithmetic_mean',
                                 'parameters': {
-                                    'weights': [0.8, 0.2]
+                                    'weights': self.search_config['weights']
                                 }
                             }
                         }
@@ -52,7 +54,6 @@ class HybridOpenSearch(OpenSearchVectorSearch):
         self,
         texts: Iterable[str],
         metadatas: Optional[List[dict]] = None,
-        ids: Optional[List[str]] = None,
         bulk_size: int = 500,
         **kwargs: Any,
     ) -> List[str]:
@@ -66,7 +67,7 @@ class HybridOpenSearch(OpenSearchVectorSearch):
             texts,
             embeddings,
             metadatas=metadatas,
-            ids=ids,
+            ids=[str(metadatas[0]['option_id'])],
             bulk_size=bulk_size,
             **kwargs,
         )
@@ -77,17 +78,16 @@ class HybridOpenSearch(OpenSearchVectorSearch):
         k: int = 4,
         **kwargs: Any
     ) -> List[Document]:
-        chunk_min_characters_count = 10
         query_embeddings = self.embeddings.embed_documents([query])
         request = {
-            'size': k,
+            'size': self.search_config.get('k'),
             'query': {
                 'hybrid': {
                     'queries': [
                         {
                             'multi_match': {
                                 'query': query,
-                                'fields': 'metadata.description'
+                                'fields': 'metadata.option_all_text'
                             }
                         },
                         {
@@ -99,7 +99,7 @@ class HybridOpenSearch(OpenSearchVectorSearch):
                                     'params': {
                                         'field': 'vector_field',
                                         'query_value': query_embeddings[0],
-                                        'space_type': kwargs.get('space_type')
+                                        'space_type': self.search_config.get('space_type')
                                     }
                                 }
                             }
@@ -113,15 +113,5 @@ class HybridOpenSearch(OpenSearchVectorSearch):
             f'{self.opensearch_url}{self.index}/_search?search_pipeline={self.search_pipeline_name}',
             json=request)
         search_results = response.json()['hits']['hits']
-        chunks = []
 
-        for chunk in search_results:
-            if len(chunk['_source']['text']) >= chunk_min_characters_count:
-                metadata = chunk['_source']['metadata']
-                metadata['score'] = chunk['_score']
-                chunks.append(Document(
-                    page_content=chunk['_source']['text'],
-                    metadata=metadata
-                ))
-
-        return chunks
+        return search_results
